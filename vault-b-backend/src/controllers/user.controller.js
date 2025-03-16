@@ -27,7 +27,7 @@ const registeruser = asyncHandler(async (req, res, next) => {
   console.log(existed);
   if (existed)
     throw new apiError(400, "user already existed with given details");
-  const secretKey = crypto.randomBytes(32).toString("hex");
+  const secretKey = crypto.randomBytes(32).toString("base64");
   const user = await User.create({
     fullname,
     email,
@@ -113,12 +113,14 @@ const displayFile = asyncHandler(async (req, res, next) => {
 // keyEncapsulation
 const keyEncapsulation = asyncHandler(async (req, res) => {
   const {cyphertext,user} = req.body;
-  console.log(req.user)
+  console.log("cyphertext1",cyphertext)
   const user2 = await User.findById(req.user._id);
   const cypherTextUint8 = new Uint8Array(Buffer.from(cyphertext, "base64"));
   const privateKeyUint8 = new Uint8Array(Buffer.from(user2.privateKey, "base64"));
   
   const decryptedSharedSecret=await kyber.decrypt(cypherTextUint8,privateKeyUint8);
+  const sharedSecret = Buffer.from(decryptedSharedSecret).toString("base64");
+  console.log("shared secret base64 x",sharedSecret,decryptedSharedSecret)
   const kyberAesKey = crypto.createHash("sha256").update(decryptedSharedSecret).digest(); //32-byte AES Key
   const userAesKey = user2.secretKey
   const {encryptedData} = await AesKeyEncryption(kyberAesKey,userAesKey);
