@@ -79,7 +79,7 @@ const Login = () => {
             console.log("kyberData",kyberData)
             localStorage.setItem("encryptedData",JSON.stringify(kyberData.data));
           }
-          // const key = await decryptAES();
+          const key = await decryptAES();
           // console.log("key",key)
           connectWallet();
           loader.load = false;

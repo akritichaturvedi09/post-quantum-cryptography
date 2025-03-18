@@ -54,6 +54,7 @@ const login = asyncHandler(async (req, res, next) => {
     throw new apiError(401, "invalid credentials");
   }
   const {formatedKyberData} = await kyberKeyEncapsulation();
+  
   const updateResponse = await User.findByIdAndUpdate(
     user._id,
     { privateKey: formatedKyberData.privateKey },
@@ -113,12 +114,13 @@ const displayFile = asyncHandler(async (req, res, next) => {
 // keyEncapsulation
 const keyEncapsulation = asyncHandler(async (req, res) => {
   const {cyphertext,user} = req.body;
-  console.log("cyphertext1",cyphertext)
+  // console.log("cyphertext1",cyphertext)
   const user2 = await User.findById(req.user._id);
   const cypherTextUint8 = new Uint8Array(Buffer.from(cyphertext, "base64"));
   const privateKeyUint8 = new Uint8Array(Buffer.from(user2.privateKey, "base64"));
   
   const decryptedSharedSecret=await kyber.decrypt(cypherTextUint8,privateKeyUint8);
+  console.log("de crypted cypherText",decryptedSharedSecret)
   const sharedSecret = Buffer.from(decryptedSharedSecret).toString("base64");
   console.log("shared secret base64 x",sharedSecret,decryptedSharedSecret)
   const kyberAesKey = crypto.createHash("sha256").update(decryptedSharedSecret).digest(); //32-byte AES Key
